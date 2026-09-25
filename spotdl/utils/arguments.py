@@ -70,7 +70,8 @@ def parse_main_options(parser: _ArgumentGroup):
         nargs="+",
         type=str,
         help=(
-            "N|Spotify/YouTube URL for a song/playlist/album/artist/etc. to download.\n\n"
+            "N|Spotify/YouTube/SoundCloud URL for a song/playlist/album/artist/etc. "
+            "to download.\n\n"
             "For album/playlist/artist searching, include 'album:', 'playlist:', 'artist:' \n"
             "(ie. 'album:the album name' you can mix these options to get more accurate results)"
             ".\n\n"

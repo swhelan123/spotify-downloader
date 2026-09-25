@@ -20,6 +20,7 @@ from yt_dlp.postprocessor.sponsorblock import SponsorBlockPP
 from spotdl.download.progress_handler import ProgressHandler
 from spotdl.providers.audio import (
     AudioProvider,
+    AudioProviderError,
     BandCamp,
     Piped,
     SoundCloud,
@@ -44,6 +45,7 @@ from spotdl.utils.lrc import generate_lrc
 from spotdl.utils.m3u import gen_m3u_files
 from spotdl.utils.metadata import MetadataError, embed_metadata
 from spotdl.utils.search import gather_known_songs, reinit_song, songs_from_albums
+from spotdl.utils.soundcloud import is_soundcloud_song, is_soundcloud_url
 
 __all__ = [
     "AUDIO_PROVIDERS",
@@ -714,12 +716,36 @@ class Downloader:
             display_progress_tracker.notify_getting_meta()
 
             logger.debug("Downloading %s using %s", song.display_name, download_url)
-            download_info = await loop.run_in_executor(
-                None,
-                lambda: audio_downloader.get_download_metadata(
-                    download_url, download=True
-                ),
-            )
+            try:
+                download_info = await loop.run_in_executor(
+                    None,
+                    lambda: audio_downloader.get_download_metadata(
+                        download_url, download=True
+                    ),
+                )
+            except AudioProviderError:
+                # SoundCloud tracks from major labels are often DRM protected.
+                # If the track was matched to a Spotify song, search for it
+                # using the audio providers instead.
+                if not is_soundcloud_url(download_url) or is_soundcloud_song(song):
+                    raise
+
+                logger.info(
+                    "Could not download %s from SoundCloud, searching other providers",
+                    song.display_name,
+                )
+
+                display_progress_tracker.notify_searching()
+                download_url = await loop.run_in_executor(None, self.search, song)
+                song.download_url = download_url
+
+                logger.debug("Downloading %s using %s", song.display_name, download_url)
+                download_info = await loop.run_in_executor(
+                    None,
+                    lambda: audio_downloader.get_download_metadata(
+                        download_url, download=True
+                    ),
+                )
 
             if download_info is None:
                 logger.debug(

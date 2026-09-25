@@ -26,6 +26,16 @@ ______________________________________________________________________
 **[Read the documentation on ReadTheDocs!](https://spotdl.readthedocs.io)**
 ______________________________________________________________________
 
+> **This is a fork of [spotDL/spotify-downloader](https://github.com/spotDL/spotify-downloader) that adds SoundCloud support.**
+> Pass SoundCloud track, album, playlist or profile URLs to the same `spotdl` command and get the same metadata and output formats as Spotify downloads.
+> See [SoundCloud](#soundcloud) below.
+>
+> Install this fork with:
+>
+> ```sh
+> pip install git+https://github.com/swhelan123/spotify-downloader.git
+> ```
+
 ## Installation
 
 Refer to our [Installation Guide](docs/installation.md) for more details.
@@ -152,6 +162,28 @@ For a list of all **options** use ```spotdl -h```
 - `meta`: Updates metadata for the provided song files.
 
 </details>
+
+### SoundCloud
+
+SoundCloud URLs work anywhere a Spotify URL does:
+
+```sh
+spotdl download https://soundcloud.com/fredagain/delilah-pull-me-out-of-this
+```
+
+Supported URLs:
+
+- Tracks: `https://soundcloud.com/{user}/{track}` (private links with a secret token work too)
+- Albums and playlists: `https://soundcloud.com/{user}/sets/{name}`
+- All tracks of a user: `https://soundcloud.com/{user}`, `/tracks` or `/popular-tracks`
+- Mobile (`m.soundcloud.com`), short (`on.soundcloud.com`) and share links with `?si=...` parameters
+
+How metadata works:
+
+- Each track is matched against Spotify. A match only counts if the name, artist and duration (within 5 seconds) all agree, so the song gets the same tags as a Spotify download: album, track number, label, cover art, lyrics and so on. Inside a SoundCloud album, the album version is preferred over singles.
+- Tracks that aren't on Spotify (remixes, edits, unreleased tracks, DJ sets) are tagged using SoundCloud's own data: the artist and title parsed from "Artist - Title", featured artists, genre, label, release date and 500x500 artwork.
+
+Audio is downloaded from SoundCloud. Many major-label tracks on SoundCloud are DRM protected or only offer a 30 second preview; if such a track was matched to Spotify, spotDL searches the usual audio providers (YouTube Music, YouTube, ...) instead. Unmatched tracks that are DRM protected or preview-only can't be downloaded.
 
 ## Music Sourcing and Audio Quality
 

@@ -81,6 +81,25 @@
     spotdl download "https://www.youtube.com/watch?v=XXYlFuWEuKI|https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b?si=b5c0790edc8f4904"
     ```
 
+??? info "SoundCloud"
+    To download SoundCloud tracks, albums, sets or all tracks of a user, run
+
+    ```bash
+    spotdl download [SoundCloudURL]
+    ```
+
+    example:
+
+    ```bash
+    spotdl download https://soundcloud.com/fredagain/delilah-pull-me-out-of-this
+    ```
+
+    Tracks are matched against Spotify to get the same metadata as Spotify downloads.
+    Tracks that aren't on Spotify (remixes, edits, DJ sets, etc.) use the metadata
+    available on SoundCloud. The audio is downloaded from SoundCloud, unless the track
+    is DRM protected or only a preview is available, in which case the matched Spotify
+    song is searched for using the audio providers.
+
 ??? info "Liked songs"
     To download liked Spotify songs, run
     > `--user-auth` is required
@@ -387,7 +406,7 @@ Main options:
                         meta: Update your audio files with metadata
                         url: Get the download URL for songs
 
-  query                 Spotify/YouTube URL for a song/playlist/album/artist/etc. to download.
+  query                 Spotify/YouTube/SoundCloud URL for a song/playlist/album/artist/etc. to download.
 
                         For album/playlist/artist searching, include 'album:', 'playlist:', 'artist:'
                         (ie. 'album:the album name' you can mix these options to get more accurate results).

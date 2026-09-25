@@ -21,6 +21,7 @@ from spotdl.types.playlist import Playlist
 from spotdl.types.saved import Saved
 from spotdl.types.song import Song, SongList
 from spotdl.utils.metadata import get_file_metadata
+from spotdl.utils.soundcloud import is_soundcloud_song, parse_soundcloud_url
 from spotdl.utils.spotify import SpotifyClient, SpotifyError
 
 __all__ = [
@@ -171,6 +172,12 @@ def get_simple_songs(
             songs.append(
                 Song.from_missing_data(url=split_urls[1], download_url=split_urls[0])
             )
+        elif "soundcloud.com/" in request:
+            soundcloud_result = parse_soundcloud_url(request)
+            if isinstance(soundcloud_result, Song):
+                songs.append(soundcloud_result)
+            elif soundcloud_result is not None:
+                lists.append(soundcloud_result)
         elif "music.youtube.com/watch?v" in request:
             track_data = get_ytm_client().get_song(request.split("?v=", 1)[1])
 
@@ -553,6 +560,10 @@ def reinit_song(song: Song) -> Song:
     ### Returns
     - Updated song object
     """
+
+    # Songs created from SoundCloud metadata have nothing to fetch from Spotify
+    if is_soundcloud_song(song):
+        return song
 
     data = song.json
     if data.get("url"):
